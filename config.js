@@ -4,8 +4,8 @@
 const CONFIG = {
   // Supabase Configuration
   supabase: {
-    url: 'YOUR_SUPABASE_URL', // e.g., 'https://your-project.supabase.co'
-    key: 'YOUR_SUPABASE_ANON_KEY' // e.g., 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
+    url: 'https://eycrrjxyhzorazoupntq.supabase.co', // e.g., 'https://your-project.supabase.co'
+    key: 'sb_publishable_bYIMCnN9KvUnEY0M9f5Ukg_pVBYcz0s' // e.g., 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
   },
 
   // Application Configuration

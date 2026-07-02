@@ -1,8 +1,8 @@
 // Hackathon IT School CRM Admin JavaScript
 
 // Configuration - Replace with your Supabase credentials
-const SUPABASE_URL = 'YOUR_SUPABASE_URL';
-const SUPABASE_KEY = 'YOUR_SUPABASE_ANON_KEY';
+const SUPABASE_URL = 'https://eycrrjxyhzorazoupntq.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_bYIMCnN9KvUnEY0M9f5Ukg_pVBYcz0s';
 
 // Initialize Supabase
 let supabase;
