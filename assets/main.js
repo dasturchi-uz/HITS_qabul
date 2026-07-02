@@ -1,8 +1,8 @@
 // Hackathon IT School - Main JavaScript
 
 // Configuration - Replace with your Supabase credentials
-const SUPABASE_URL = 'YOUR_SUPABASE_URL';
-const SUPABASE_KEY = 'YOUR_SUPABASE_ANON_KEY';
+const SUPABASE_URL = 'https://halphorcsdtrnudluqzt.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_E2yIxlz8GswFJn-zfnzpxQ_ZsxqEMoy';
 
 // Initialize Supabase
 let supabase;

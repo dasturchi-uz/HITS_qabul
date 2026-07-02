@@ -1,13 +1,17 @@
 // Hackathon IT School CRM Admin JavaScript
 
 // Configuration - Replace with your Supabase credentials
-const SUPABASE_URL = 'https://eycrrjxyhzorazoupntq.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_bYIMCnN9KvUnEY0M9f5Ukg_pVBYcz0s';
+const SUPABASE_URL = 'https://halphorcsdtrnudluqzt.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_E2yIxlz8GswFJn-zfnzpxQ_ZsxqEMoy';
 
 // Initialize Supabase
 let supabase;
 try {
-  supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  if (window.supabase) {
+    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  } else {
+    console.error('Supabase library not loaded');
+  }
 } catch (error) {
   console.error('Supabase initialization error:', error);
 }
@@ -182,14 +186,14 @@ async function handleLogin(e) {
       .single();
     
     if (error || !data) {
-      showLoginError('Email yoki parol noto\'g\'ri');
+      showLoginError('Email yoki parol notog\'ri');
       showLoginLoading(false);
       return;
     }
     
     // Simple password check (in production, use proper hashing)
     if (data.password_hash !== password) {
-      showLoginError('Email yoki parol noto\'g\'ri');
+      showLoginError('Email yoki parol notog\'ri');
       showLoginLoading(false);
       return;
     }
@@ -604,7 +608,7 @@ function renderApplications(applications) {
       <td>${app.phone}</td>
       <td>${getTrackName(app.preferred_it_track)}</td>
       <td><span class="status-badge ${app.status}">${getStatusName(app.status)}</span></td>
-      <td>${app.assigned_to ? 'Mas'ul' : '-'}</td>
+      <td>${app.assigned_to ? 'Masul' : '-'}</td>
       <td>${formatDate(app.created_at)}</td>
       <td>
         <div class="btn-group">
