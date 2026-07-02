@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>Admin Panel | HACKATHON IT SCHOOL CRM</title>
+<meta name="description" content="Hackathon IT School - Qabul boshqaruvi tizimi">
+<link rel="icon" href="assets/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="stylesheet" href="admin.css">
+</head>
+<body>
+
+<div id="loginScreen" class="login-screen">
+  <div class="login-container">
+    <div class="login-logo">
+      <img src="assets/logo.png" alt="Hackathon IT School">
+      <h1>HACKATHON IT SCHOOL</h1>
+      <p>CRM Tizimi</p>
+    </div>
+    <form id="loginForm" class="login-form">
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="loginEmail" placeholder="admin@hackathon.uz" required>
+      </div>
+      <div class="form-group">
+        <label>Parol</label>
+        <input type="password" id="loginPassword" placeholder="••••••••" required>
+      </div>
+      <button type="submit" class="btn btn-primary">
+        <span id="loginBtnText">Tizimga kirish</span>
+        <i class="fas fa-spinner fa-spin" id="loginSpinner" style="display:none;"></i>
+      </button>
+      <div id="loginError" class="error-message"></div>
+    </form>
+  </div>
+</div>
+
+<div id="adminPanel" class="admin-panel" style="display:none;">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <img src="assets/logo.png" alt="Hackathon IT School" class="sidebar-logo">
+      <div class="sidebar-brand">
+        <div class="brand-name">HACKATHON</div>
+        <div class="brand-sub">IT SCHOOL CRM</div>
+      </div>
+    </div>
+    
+    <nav class="sidebar-nav">
+      <a href="#dashboard" class="nav-item active" data-page="dashboard">
+        <i class="fas fa-chart-line"></i>
+        <span>Dashboard</span>
+      </a>
+      <a href="#applications" class="nav-item" data-page="applications">
+        <i class="fas fa-user-plus"></i>
+        <span>Arizalar</span>
+        <span class="badge" id="applicationsBadge">0</span>
+      </a>
+      <a href="#students" class="nav-item" data-page="students">
+        <i class="fas fa-graduation-cap"></i>
+        <span>O'quvchilar</span>
+      </a>
+      <a href="#communications" class="nav-item" data-page="communications">
+        <i class="fas fa-comments"></i>
+        <span>Aloqa</span>
+      </a>
+      <a href="#tasks" class="nav-item" data-page="tasks">
+        <i class="fas fa-tasks"></i>
+        <span>Vazifalar</span>
+        <span class="badge" id="tasksBadge">0</span>
+      </a>
+      <a href="#payments" class="nav-item" data-page="payments">
+        <i class="fas fa-money-bill-wave"></i>
+        <span>To'lovlar</span>
+      </a>
+      <a href="#reports" class="nav-item" data-page="reports">
+        <i class="fas fa-file-alt"></i>
+        <span>Hisobotlar</span>
+      </a>
+      <a href="#settings" class="nav-item" data-page="settings">
+        <i class="fas fa-cog"></i>
+        <span>Sozlamalar</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar">
+          <i class="fas fa-user"></i>
+        </div>
+        <div class="user-details">
+          <div class="user-name" id="currentUserName">Admin</div>
+          <div class="user-role" id="currentUserRole">Administrator</div>
+        </div>
+      </div>
+      <button id="logoutBtn" class="logout-btn">
+        <i class="fas fa-sign-out-alt"></i>
+        <span>Chiqish</span>
+      </button>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <header class="top-header">
+      <div class="header-left">
+        <button class="menu-toggle" id="menuToggle">
+          <i class="fas fa-bars"></i>
+        </button>
+        <h1 class="page-title" id="pageTitle">Dashboard</h1>
+      </div>
+      <div class="header-right">
+        <div class="search-box">
+          <i class="fas fa-search"></i>
+          <input type="text" placeholder="Qidirish..." id="globalSearch">
+        </div>
+        <button class="header-btn" id="refreshBtn">
+          <i class="fas fa-sync-alt"></i>
+        </button>
+        <button class="header-btn" id="notificationsBtn">
+          <i class="fas fa-bell"></i>
+          <span class="notification-badge" id="notificationBadge">0</span>
+        </button>
+      </div>
+    </header>
+
+    <div class="content-area">
+      <!-- Dashboard Page -->
+      <div id="dashboardPage" class="page active">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon blue">
+              <i class="fas fa-user-plus"></i>
+            </div>
+            <div class="stat-content">
+              <div class="stat-label">Jami arizalar</div>
+              <div class="stat-value" id="totalApplications">0</div>
+              <div class="stat-change positive" id="todayApplications">
+                <i class="fas fa-arrow-up"></i> +0 bugun
+              </div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon green">
+              <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="stat-content">
+              <div class="stat-label">Qabul qilingan</div>
+              <div class="stat-value" id="enrolledStudents">0</div>
+              <div class="stat-change" id="enrollmentRate">
+                <i class="fas fa-percentage"></i> 0%
+              </div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon orange">
+              <i class="fas fa-phone"></i>
+            </div>
+            <div class="stat-content">
+              <div class="stat-label">Bog'lanish kerak</div>
+              <div class="stat-value" id="pendingContacts">0</div>
+              <div class="stat-change">
+                <i class="fas fa-clock"></i> Kutmoqda
+              </div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon purple">
+              <i class="fas fa-calendar-check"></i>
+            </div>
+            <div class="stat-content">
+              <div class="stat-label">Bugun suhbat</div>
+              <div class="stat-value" id="todayInterviews">0</div>
+              <div class="stat-change">
+                <i class="fas fa-video"></i> Rejalashtirilgan
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="charts-grid">
+          <div class="chart-card">
+            <div class="chart-header">
+              <h3>Arizalar dinamikasi</h3>
+              <select class="chart-filter" id="chartPeriod">
+                <option value="7">Oxirgi 7 kun</option>
+                <option value="30">Oxirgi 30 kun</option>
+                <option value="90">Oxirgi 3 oy</option>
+              </select>
+            </div>
+            <canvas id="applicationsChart"></canvas>
+          </div>
+          <div class="chart-card">
+            <div class="chart-header">
+              <h3>Arizalar holati</h3>
+            </div>
+            <canvas id="statusChart"></canvas>
+          </div>
+        </div>
+
+        <div class="recent-section">
+          <div class="section-header">
+            <h3>So'nggi arizalar</h3>
+            <a href="#applications" class="view-all">Barchasini ko'rish</a>
+          </div>
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>F.I.SH</th>
+                  <th>Telefon</th>
+                  <th>Holat</th>
+                  <th>Sana</th>
+                  <th>Amallar</th>
+                </tr>
+              </thead>
+              <tbody id="recentApplicationsTable">
+                <tr>
+                  <td colspan="5" class="text-center">Yuklanmoqda...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="tasks-section">
+          <div class="section-header">
+            <h3>Kelgusi vazifalar</h3>
+            <a href="#tasks" class="view-all">Barchasini ko'rish</a>
+          </div>
+          <div class="tasks-list" id="upcomingTasks">
+            <div class="task-item">
+              <div class="task-info">
+                <div class="task-title">Yuklanmoqda...</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Applications Page -->
+      <div id="applicationsPage" class="page">
+        <div class="page-actions">
+          <div class="filter-group">
+            <select class="filter-select" id="statusFilter">
+              <option value="">Barcha holatlar</option>
+              <option value="new">Yangi</option>
+              <option value="contacted">Bog'langan</option>
+              <option value="interview_scheduled">Suhbat rejalashtirilgan</option>
+              <option value="interviewed">Suhbat o'tkazilgan</option>
+              <option value="approved">Tasdiqlangan</option>
+              <option value="rejected">Rad etilgan</option>
+              <option value="enrolled">Qabul qilingan</option>
+              <option value="waitlist">Kutish ro'yxati</option>
+            </select>
+            <select class="filter-select" id="trackFilter">
+              <option value="">Barcha yo'nalishlar</option>
+              <option value="python">Python</option>
+              <option value="web">Web dasturlash</option>
+              <option value="mobile">Mobil dasturlash</option>
+              <option value="design">UI/UX dizayn</option>
+              <option value="network">Tarmoq texnologiyalari</option>
+              <option value="security">Kiberxavfsizlik</option>
+            </select>
+            <input type="text" class="search-input" placeholder="Ism yoki telefon raqam..." id="applicationSearch">
+          </div>
+          <button class="btn btn-primary" id="addApplicationBtn">
+            <i class="fas fa-plus"></i>
+            Yangi ariza
+          </button>
+        </div>
+
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th><input type="checkbox" id="selectAllApps"></th>
+                <th>F.I.SH</th>
+                <th>Telefon</th>
+                <th>IT yo'nalishi</th>
+                <th>Holat</th>
+                <th>Mas'ul</th>
+                <th>Sana</th>
+                <th>Amallar</th>
+              </tr>
+            </thead>
+            <tbody id="applicationsTable">
+              <tr>
+                <td colspan="8" class="text-center">Yuklanmoqda...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="pagination">
+          <button class="pagination-btn" id="prevPage" disabled>
+            <i class="fas fa-chevron-left"></i>
+          </button>
+          <span class="page-info" id="pageInfo">1 - 10 / 0</span>
+          <button class="pagination-btn" id="nextPage" disabled>
+            <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Students Page -->
+      <div id="studentsPage" class="page">
+        <div class="page-actions">
+          <div class="filter-group">
+            <select class="filter-select" id="studentStatusFilter">
+              <option value="">Barcha holatlar</option>
+              <option value="active">Faol</option>
+              <option value="graduated">Bitirgan</option>
+              <option value="suspended">Vaqtinchalik to'xtatilgan</option>
+            </select>
+            <select class="filter-select" id="gradeFilter">
+              <option value="">Barcha sinflar</option>
+              <option value="5">5-sinf</option>
+              <option value="6">6-sinf</option>
+              <option value="7">7-sinf</option>
+              <option value="8">8-sinf</option>
+              <option value="9">9-sinf</option>
+              <option value="10">10-sinf</option>
+              <option value="11">11-sinf</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" id="addStudentBtn">
+            <i class="fas fa-plus"></i>
+            Yangi o'quvchi
+          </button>
+        </div>
+
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>F.I.SH</th>
+                <th>Sinf</th>
+                <th>Telefon</th>
+                <th>IT yo'nalishi</th>
+                <th>Yashash turi</th>
+                <th>Holat</th>
+                <th>Amallar</th>
+              </tr>
+            </thead>
+            <tbody id="studentsTable">
+              <tr>
+                <td colspan="7" class="text-center">Yuklanmoqda...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Communications Page -->
+      <div id="communicationsPage" class="page">
+        <div class="page-actions">
+          <div class="filter-group">
+            <select class="filter-select" id="commTypeFilter">
+              <option value="">Barcha turlar</option>
+              <option value="call">Qo'ng'iroq</option>
+              <option value="sms">SMS</option>
+              <option value="email">Email</option>
+              <option value="whatsapp">WhatsApp</option>
+              <option value="meeting">Uchrashuv</option>
+            </select>
+            <select class="filter-select" id="commDirectionFilter">
+              <option value="">Barcha yo'nalishlar</option>
+              <option value="inbound">Kiruvchi</option>
+              <option value="outbound">Chiquvchi</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" id="addCommunicationBtn">
+            <i class="fas fa-plus"></i>
+            Yangi aloqa
+          </button>
+        </div>
+
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Turi</th>
+                <th>Yo'nalish</th>
+                <th>Aruzachi</th>
+                <th>Mavzu</th>
+                <th>Natija</th>
+                <th>Sana</th>
+                <th>Amallar</th>
+              </tr>
+            </thead>
+            <tbody id="communicationsTable">
+              <tr>
+                <td colspan="7" class="text-center">Yuklanmoqda...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tasks Page -->
+      <div id="tasksPage" class="page">
+        <div class="page-actions">
+          <div class="filter-group">
+            <select class="filter-select" id="taskStatusFilter">
+              <option value="">Barcha holatlar</option>
+              <option value="pending">Kutilmoqda</option>
+              <option value="in_progress">Bajarilmoqda</option>
+              <option value="completed">Bajarilgan</option>
+            </select>
+            <select class="filter-select" id="taskPriorityFilter">
+              <option value="">Barcha ustunliklar</option>
+              <option value="low">Past</option>
+              <option value="medium">O'rta</option>
+              <option value="high">Yuqori</option>
+              <option value="urgent">Shoshilinch</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" id="addTaskBtn">
+            <i class="fas fa-plus"></i>
+            Yangi vazifa
+          </button>
+        </div>
+
+        <div class="tasks-grid" id="tasksGrid">
+          <div class="task-card">
+            <div class="task-header">
+              <span class="task-priority high">Yuqori</span>
+              <span class="task-status pending">Kutilmoqda</span>
+            </div>
+            <h4 class="task-title">Yuklanmoqda...</h4>
+          </div>
+        </div>
+      </div>
+
+      <!-- Payments Page -->
+      <div id="paymentsPage" class="page">
+        <div class="page-actions">
+          <div class="filter-group">
+            <select class="filter-select" id="paymentStatusFilter">
+              <option value="">Barcha holatlar</option>
+              <option value="pending">Kutilmoqda</option>
+              <option value="completed">To'langan</option>
+              <option value="failed">Xato</option>
+              <option value="refunded">Qaytarilgan</option>
+            </select>
+            <input type="month" class="filter-input" id="paymentMonthFilter">
+          </div>
+          <button class="btn btn-primary" id="addPaymentBtn">
+            <i class="fas fa-plus"></i>
+            Yangi to'lov
+          </button>
+        </div>
+
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Check №</th>
+                <th>O'quvchi</th>
+                <th>Summa</th>
+                <th>To'lov turi</th>
+                <th>Holat</th>
+                <th>Sana</th>
+                <th>Amallar</th>
+              </tr>
+            </thead>
+            <tbody id="paymentsTable">
+              <tr>
+                <td colspan="7" class="text-center">Yuklanmoqda...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="payment-summary">
+          <div class="summary-card">
+            <h4>Jami to'lovlar</h4>
+            <div class="summary-value" id="totalPayments">0 so'm</div>
+          </div>
+          <div class="summary-card">
+            <h4>Bugun to'lovlar</h4>
+            <div class="summary-value" id="todayPayments">0 so'm</div>
+          </div>
+          <div class="summary-card">
+            <h4>Kutilmoqda</h4>
+            <div class="summary-value" id="pendingPayments">0 so'm</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Reports Page -->
+      <div id="reportsPage" class="page">
+        <div class="reports-grid">
+          <div class="report-card">
+            <div class="report-icon">
+              <i class="fas fa-users"></i>
+            </div>
+            <h3>Arizalar hisoboti</h3>
+            <p>Arizalar soni va holati bo'yicha hisobot</p>
+            <button class="btn btn-outline" onclick="generateReport('applications')">
+              <i class="fas fa-download"></i>
+              Yuklab olish
+            </button>
+          </div>
+          <div class="report-card">
+            <div class="report-icon">
+              <i class="fas fa-money-bill"></i>
+            </div>
+            <h3>To'lovlar hisoboti</h3>
+            <p>To'lovlar va moliyaviy hisobot</p>
+            <button class="btn btn-outline" onclick="generateReport('payments')">
+              <i class="fas fa-download"></i>
+              Yuklab olish
+            </button>
+          </div>
+          <div class="report-card">
+            <div class="report-icon">
+              <i class="fas fa-chart-pie"></i>
+            </div>
+            <h3>Statistika hisoboti</h3>
+            <p>Umumiy statistika va ko'rsatkichlar</p>
+            <button class="btn btn-outline" onclick="generateReport('statistics')">
+              <i class="fas fa-download"></i>
+              Yuklab olish
+            </button>
+          </div>
+          <div class="report-card">
+            <div class="report-icon">
+              <i class="fas fa-phone"></i>
+            </div>
+            <h3>Aloqa hisoboti</h3>
+            <p>Bog'lanishlar va suhbatlar hisoboti</p>
+            <button class="btn btn-outline" onclick="generateReport('communications')">
+              <i class="fas fa-download"></i>
+              Yuklab olish
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Settings Page -->
+      <div id="settingsPage" class="page">
+        <div class="settings-section">
+          <h3>Maktab ma'lumotlari</h3>
+          <form id="schoolSettingsForm" class="settings-form">
+            <div class="form-row">
+              <div class="form-group">
+                <label>Maktab nomi</label>
+                <input type="text" id="schoolName" value="Hackathon IT School">
+              </div>
+              <div class="form-group">
+                <label>Telefon raqam</label>
+                <input type="text" id="schoolPhone" value="+998 50 045 60 10">
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Manzil</label>
+              <input type="text" id="schoolAddress" value="Farg'ona shahri, Mustaqillik shoh ko'chasi, 341-uy">
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>O'quv yili</label>
+                <input type="text" id="schoolYear" value="2026">
+              </div>
+              <div class="form-group">
+                <label>Maksimal o'quvchi soni</label>
+                <input type="number" id="maxStudents" value="100">
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Saqlash</button>
+          </form>
+        </div>
+
+        <div class="settings-section">
+          <h3>Foydalanuvchilar boshqaruvi</h3>
+          <div class="users-list" id="usersList">
+            <div class="user-item">
+              <div class="user-avatar">
+                <i class="fas fa-user"></i>
+              </div>
+              <div class="user-info">
+                <div class="user-name">Super Admin</div>
+                <div class="user-email">admin@hackathon.uz</div>
+                <span class="user-role-badge admin">Admin</span>
+              </div>
+              <div class="user-actions">
+                <button class="btn btn-sm btn-outline">Tahrirlash</button>
+              </div>
+            </div>
+          </div>
+          <button class="btn btn-primary" id="addUserBtn">
+            <i class="fas fa-plus"></i>
+            Yangi foydalanuvchi
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Application Modal -->
+<div id="applicationModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 id="applicationModalTitle">Yangi ariza</h3>
+      <button class="modal-close" id="closeApplicationModal">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <form id="applicationForm" class="modal-body">
+      <input type="hidden" id="applicationId">
+      <div class="form-row">
+        <div class="form-group">
+          <label>F.I.SH *</label>
+          <input type="text" id="appFullName" required>
+        </div>
+        <div class="form-group">
+          <label>Telefon raqami *</label>
+          <input type="tel" id="appPhone" required>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Ota-ona ismi</label>
+          <input type="text" id="appParentName">
+        </div>
+        <div class="form-group">
+          <label>Ota-ona telefoni</label>
+          <input type="tel" id="appParentPhone">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Tug'ilgan sana</label>
+          <input type="date" id="appBirthDate">
+        </div>
+        <div class="form-group">
+          <label>Jins</label>
+          <select id="appGender">
+            <option value="">Tanlang</option>
+            <option value="male">Erkak</option>
+            <option value="female">Ayol</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Manzil</label>
+        <textarea id="appAddress" rows="2"></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>O'tgan maktab</label>
+          <input type="text" id="appPreviousSchool">
+        </div>
+        <div class="form-group">
+          <label>Sinf</label>
+          <select id="appGradeLevel">
+            <option value="">Tanlang</option>
+            <option value="5">5-sinf</option>
+            <option value="6">6-sinf</option>
+            <option value="7">7-sinf</option>
+            <option value="8">8-sinf</option>
+            <option value="9">9-sinf</option>
+            <option value="10">10-sinf</option>
+            <option value="11">11-sinf</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>IT yo'nalishi</label>
+          <select id="appITTrack">
+            <option value="">Tanlang</option>
+            <option value="python">Python dasturlash</option>
+            <option value="web">Web dasturlash</option>
+            <option value="mobile">Mobil dasturlash</option>
+            <option value="design">UI/UX dizayn</option>
+            <option value="network">Tarmoq texnologiyalari</option>
+            <option value="security">Kiberxavfsizlik</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Yashash turi</label>
+          <select id="appAccommodation">
+            <option value="day">Uydan qatnash</option>
+            <option value="transport">Transport bilan</option>
+            <option value="dormitory">Yotoqxona</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Holat</label>
+          <select id="appStatus">
+            <option value="new">Yangi</option>
+            <option value="contacted">Bog'langan</option>
+            <option value="interview_scheduled">Suhbat rejalashtirilgan</option>
+            <option value="interviewed">Suhbat o'tkazilgan</option>
+            <option value="approved">Tasdiqlangan</option>
+            <option value="rejected">Rad etilgan</option>
+            <option value="enrolled">Qabul qilingan</option>
+            <option value="waitlist">Kutish ro'yxati</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Mas'ul operator</label>
+          <select id="appAssignedTo">
+            <option value="">Tanlang</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Izoh</label>
+        <textarea id="appNotes" rows="3"></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" id="cancelApplication">Bekor qilish</button>
+        <button type="submit" class="btn btn-primary">Saqlash</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Communication Modal -->
+<div id="communicationModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Yangi aloqa</h3>
+      <button class="modal-close" id="closeCommunicationModal">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <form id="communicationForm" class="modal-body">
+      <input type="hidden" id="commApplicationId">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Aruzachi</label>
+          <select id="commApplication" required>
+            <option value="">Tanlang</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Turi</label>
+          <select id="commType" required>
+            <option value="call">Qo'ng'iroq</option>
+            <option value="sms">SMS</option>
+            <option value="email">Email</option>
+            <option value="whatsapp">WhatsApp</option>
+            <option value="meeting">Uchrashuv</option>
+            <option value="note">Eslatma</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Yo'nalish</label>
+          <select id="commDirection">
+            <option value="outbound">Chiquvchi</option>
+            <option value="inbound">Kiruvchi</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Davomiylik (daqiqada)</label>
+          <input type="number" id="commDuration" min="0">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Mavzu</label>
+        <input type="text" id="commSubject">
+      </div>
+      <div class="form-group">
+        <label>Mazmun</label>
+        <textarea id="commContent" rows="4" required></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Natija</label>
+          <input type="text" id="commOutcome">
+        </div>
+        <div class="form-group">
+          <label>Keyingi bog'lanish</label>
+          <input type="date" id="commNextFollowUp">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" id="cancelCommunication">Bekor qilish</button>
+        <button type="submit" class="btn btn-primary">Saqlash</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Task Modal -->
+<div id="taskModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 id="taskModalTitle">Yangi vazifa</h3>
+      <button class="modal-close" id="closeTaskModal">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <form id="taskForm" class="modal-body">
+      <input type="hidden" id="taskId">
+      <div class="form-group">
+        <label>Sarlavha *</label>
+        <input type="text" id="taskTitle" required>
+      </div>
+      <div class="form-group">
+        <label>Tavsif</label>
+        <textarea id="taskDescription" rows="3"></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Aruzachi</label>
+          <select id="taskApplication">
+            <option value="">Tanlang (ixtiyoriy)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Mas'ul</label>
+          <select id="taskAssignedTo">
+            <option value="">Tanlang</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Ustunlik</label>
+          <select id="taskPriority">
+            <option value="low">Past</option>
+            <option value="medium">O'rta</option>
+            <option value="high">Yuqori</option>
+            <option value="urgent">Shoshilinch</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Muddat</label>
+          <input type="date" id="taskDueDate">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Holat</label>
+        <select id="taskStatus">
+          <option value="pending">Kutilmoqda</option>
+          <option value="in_progress">Bajarilmoqda</option>
+          <option value="completed">Bajarilgan</option>
+          <option value="cancelled">Bekor qilingan</option>
+        </select>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" id="cancelTask">Bekor qilish</button>
+        <button type="submit" class="btn btn-primary">Saqlash</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Payment Modal -->
+<div id="paymentModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 id="paymentModalTitle">Yangi to'lov</h3>
+      <button class="modal-close" id="closePaymentModal">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <form id="paymentForm" class="modal-body">
+      <input type="hidden" id="paymentId">
+      <div class="form-row">
+        <div class="form-group">
+          <label>O'quvchi *</label>
+          <select id="paymentApplication" required>
+            <option value="">Tanlang</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Summa (so'm) *</label>
+          <input type="number" id="paymentAmount" required>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>To'lov turi</label>
+          <select id="paymentMethod">
+            <option value="cash">Naqd</option>
+            <option value="card">Karta</option>
+            <option value="bank_transfer">Bank o'tkazmasi</option>
+            <option value="click">Click</option>
+            <option value="payme">Payme</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>To'lov sanasi</label>
+          <input type="date" id="paymentDate">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Holat</label>
+        <select id="paymentStatus">
+          <option value="pending">Kutilmoqda</option>
+          <option value="completed">To'langan</option>
+          <option value="failed">Xato</option>
+          <option value="refunded">Qaytarilgan</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Check №</label>
+        <input type="text" id="paymentReceipt">
+      </div>
+      <div class="form-group">
+        <label>Izoh</label>
+        <textarea id="paymentDescription" rows="2"></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" id="cancelPayment">Bekor qilish</button>
+        <button type="submit" class="btn btn-primary">Saqlash</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- User Modal -->
+<div id="userModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 id="userModalTitle">Yangi foydalanuvchi</h3>
+      <button class="modal-close" id="closeUserModal">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <form id="userForm" class="modal-body">
+      <input type="hidden" id="userId">
+      <div class="form-group">
+        <label>F.I.SH *</label>
+        <input type="text" id="userFullName" required>
+      </div>
+      <div class="form-group">
+        <label>Email *</label>
+        <input type="email" id="userEmail" required>
+      </div>
+      <div class="form-group">
+        <label>Parol *</label>
+        <input type="password" id="userPassword" required>
+      </div>
+      <div class="form-group">
+        <label>Rol</label>
+        <select id="userRole">
+          <option value="admin">Admin</option>
+          <option value="manager">Manager</option>
+          <option value="operator">Operator</option>
+        </select>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" id="cancelUser">Bekor qilish</button>
+        <button type="submit" class="btn btn-primary">Saqlash</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Toast Notification -->
+<div id="toast" class="toast">
+  <div class="toast-icon">
+    <i class="fas fa-check-circle"></i>
+  </div>
+  <div class="toast-message"></div>
+</div>
+
+<script src="admin.js"></script>
+</body>
+</html>
