@@ -127,7 +127,7 @@ CREATE INDEX idx_tasks_due_date ON tasks(due_date);
 
 -- Insert default admin user (password: admin123 - change this immediately!)
 INSERT INTO users (email, password_hash, full_name, role) 
-VALUES ('admin@hackathon.uz', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5NU7bTqY8F4Zm', 'Super Admin', 'admin');
+VALUES ('admin@hackathon.uz', 'admin123', 'Super Admin', 'admin');
 
 -- Insert default settings
 INSERT INTO settings (key, value, description) VALUES

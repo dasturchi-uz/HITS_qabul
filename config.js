@@ -4,8 +4,8 @@
 const CONFIG = {
   // Supabase Configuration
   supabase: {
-    url: 'https://eycrrjxyhzorazoupntq.supabase.co', // e.g., 'https://your-project.supabase.co'
-    key: 'sb_publishable_bYIMCnN9KvUnEY0M9f5Ukg_pVBYcz0s' // e.g., 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
+    url: 'https://halphorcsdtrnudluqzt.supabase.co', // e.g., 'https://your-project.supabase.co'
+    key: 'sb_publishable_E2yIxlz8GswFJn-zfnzpxQ_ZsxqEMoy' // e.g., 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
   },
 
   // Application Configuration
